@@ -140,7 +140,7 @@ function RootComponent() {
 function AuthGate() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const isPublicRoute = pathname === "/" || pathname === "/auth";
+  const isPublicRoute = pathname === "/" || pathname === "/auth" || pathname === "/fontes";
   const isAuthRoute = pathname === "/auth";
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
