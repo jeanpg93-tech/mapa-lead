@@ -86,10 +86,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MapaLead — Inteligência territorial para prospecção" },
       { name: "description", content: "MapaLead transforma território em oportunidades comerciais para corretores, imobiliárias e empresas." },
-      { property: "og:title", content: "MapaLead" },
-      { property: "og:description", content: "Plataforma de inteligência territorial para prospecção imobiliária e comercial." },
+      { property: "og:title", content: "MapaLead — Inteligência territorial para prospecção" },
+      { property: "og:description", content: "MapaLead transforma território em oportunidades comerciais para corretores, imobiliárias e empresas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "MapaLead — Inteligência territorial para prospecção" },
+      { name: "twitter:description", content: "MapaLead transforma território em oportunidades comerciais para corretores, imobiliárias e empresas." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a9be7b2c-d86f-4e97-8742-561c355d23a0" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a9be7b2c-d86f-4e97-8742-561c355d23a0" },
     ],
 
     links: [
