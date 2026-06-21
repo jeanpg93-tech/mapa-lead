@@ -121,7 +121,7 @@ function Relatorios() {
   });
   const { data: topLocais = [] } = useQuery({
     queryKey: ["relatorios", "top-locais"],
-    queryFn: getTopLocaisComOportunidades,
+    queryFn: () => getTopLocaisComOportunidades(),
   });
   const { data: tarefasAtrasadas = 0 } = useQuery({
     queryKey: ["relatorios", "tarefas-atrasadas"],

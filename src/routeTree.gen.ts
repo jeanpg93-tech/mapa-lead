@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as OportunidadesRouteImport } from './routes/oportunidades'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as FunilRouteImport } from './routes/funil'
@@ -25,6 +26,11 @@ import { Route as LocaisIdRouteImport } from './routes/locais.$id'
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OportunidadesRoute = OportunidadesRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
   '/oportunidades': typeof OportunidadesRoute
+  '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/locais/$id': typeof LocaisIdRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
   '/oportunidades': typeof OportunidadesRoute
+  '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/locais/$id': typeof LocaisIdRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
   '/oportunidades': typeof OportunidadesRoute
+  '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/locais/$id': typeof LocaisIdRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/funil'
     | '/locais'
     | '/oportunidades'
+    | '/relatorios'
     | '/tarefas'
     | '/locais/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/funil'
     | '/locais'
     | '/oportunidades'
+    | '/relatorios'
     | '/tarefas'
     | '/locais/$id'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/funil'
     | '/locais'
     | '/oportunidades'
+    | '/relatorios'
     | '/tarefas'
     | '/locais/$id'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   FunilRoute: typeof FunilRoute
   LocaisRoute: typeof LocaisRouteWithChildren
   OportunidadesRoute: typeof OportunidadesRoute
+  RelatoriosRoute: typeof RelatoriosRoute
   TarefasRoute: typeof TarefasRoute
 }
 
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/tarefas'
       fullPath: '/tarefas'
       preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/oportunidades': {
@@ -296,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   FunilRoute: FunilRoute,
   LocaisRoute: LocaisRouteWithChildren,
   OportunidadesRoute: OportunidadesRoute,
+  RelatoriosRoute: RelatoriosRoute,
   TarefasRoute: TarefasRoute,
 }
 export const routeTree = rootRouteImport
