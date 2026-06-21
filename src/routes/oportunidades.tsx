@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Download, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import {
   STATUS_OPORTUNIDADE,
   type StatusOportunidade,
 } from "@/lib/oportunidades-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/oportunidades")({
   head: () => ({ meta: [{ title: "Oportunidades — MapaLead" }] }),
@@ -71,6 +72,22 @@ function OportunidadesPage() {
         description="Negócios comerciais vinculados a locais ou regiões."
         actions={
           <>
+            <Button
+              variant="outline"
+              disabled={ops.length === 0}
+              onClick={() =>
+                exportToCsv("oportunidades", [
+                  { header: "Título", accessor: (o) => o.titulo },
+                  { header: "Local", accessor: (o) => o.locais?.nome ?? "" },
+                  { header: "Status", accessor: (o) => o.status },
+                  { header: "Responsável", accessor: (o) => o.responsavel ?? "" },
+                  { header: "Valor estimado", accessor: (o) => o.valor_estimado ?? "" },
+                  { header: "Criada em", accessor: (o) => o.created_at },
+                ], ops)
+              }
+            >
+              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+            </Button>
             <Button variant="outline" asChild>
               <Link to="/funil">Ver funil</Link>
             </Button>
