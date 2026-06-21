@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, MapPin, Search } from "lucide-react";
+import { AlertTriangle, Building2, ExternalLink, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { PageBody, PageHeader } from "@/components/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,38 +131,69 @@ function BuscaTerritorial() {
 
             {resultadoPublico.length > 0 && (
               <div className="grid gap-3 lg:grid-cols-2">
-                {resultadoPublico.map((place, idx) => (
-                  <Card key={`${place.place_id ?? place.osm_id ?? idx}`}>
-                    <CardContent className="space-y-3 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-medium">{placeTitle(place)}</h3>
-                          <p className="mt-1 text-sm text-muted-foreground">{place.display_name}</p>
+                {resultadoPublico.map((place, idx) => {
+                  const isManualCandidate = Boolean(place.is_manual_candidate);
+                  const externalUrl = publicSearchUrl(placeTitle(place), cidadeBusca, ufBusca);
+
+                  return (
+                    <Card
+                      key={`${place.place_id ?? place.osm_id ?? place.display_name ?? idx}`}
+                      className={isManualCandidate ? "border-amber-300 bg-amber-50/60" : undefined}
+                    >
+                      <CardContent className="space-y-3 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="font-medium">{placeTitle(place)}</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">{place.display_name}</p>
+                          </div>
+                          <Badge variant={isManualCandidate ? "secondary" : "outline"}>
+                            {placeSourceLabel(place)}
+                          </Badge>
                         </div>
-                        <Badge variant="outline">{place.type ?? place.category ?? "local"}</Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        {place.address?.suburb && <Badge variant="secondary">{place.address.suburb}</Badge>}
-                        {place.address?.city && <Badge variant="secondary">{place.address.city}</Badge>}
-                        {place.address?.town && <Badge variant="secondary">{place.address.town}</Badge>}
-                        {place.lat && place.lon && <Badge variant="secondary">{place.lat}, {place.lon}</Badge>}
-                      </div>
-                      <Button
-                        size="sm"
-                        disabled={savePlace.isPending}
-                        onClick={() => savePlace.mutate(place)}
-                      >
-                        Salvar local
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                        {isManualCandidate && (
+                          <div className="flex gap-2 rounded-md border border-amber-200 bg-amber-100/70 p-3 text-xs text-amber-900">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                            <p>
+                              Esta fonte cartográfica não confirmou o condomínio pelo nome. O registro pode ser salvo para validação manual com confiança baixa.
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          {place.address?.suburb && <Badge variant="secondary">{place.address.suburb}</Badge>}
+                          {place.address?.city && <Badge variant="secondary">{place.address.city}</Badge>}
+                          {place.address?.town && <Badge variant="secondary">{place.address.town}</Badge>}
+                          {place.lat && place.lon && <Badge variant="secondary">{place.lat}, {place.lon}</Badge>}
+                          {isManualCandidate && <Badge variant="secondary">Confiança baixa</Badge>}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            disabled={savePlace.isPending}
+                            onClick={() => savePlace.mutate(place)}
+                          >
+                            {isManualCandidate ? "Salvar para validar" : "Salvar local"}
+                          </Button>
+                          {isManualCandidate && (
+                            <Button size="sm" variant="outline" asChild>
+                              <a href={externalUrl} target="_blank" rel="noreferrer">
+                                Pesquisar evidências <ExternalLink className="ml-1 h-3 w-3" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
 
             {!publicSearch.isPending && resultadoPublico.length === 0 && nomeBusca.trim().length > 0 && (
               <p className="text-xs text-muted-foreground">
-                Dica: se não encontrar, tente variações como “Edifício”, “Condomínio”, “Residencial” ou apenas o nome principal.
+                Dica: se a fonte pública não confirmar o prédio pelo nome, o MapaLead cria um candidato pendente para validação manual.
               </p>
             )}
           </CardContent>
@@ -249,15 +280,44 @@ function placeCity(place: PublicPlaceResult, fallback: string) {
 }
 
 function placeNeighborhood(place: PublicPlaceResult) {
+  if (place.is_manual_candidate) return null;
   return place.address?.suburb || place.address?.neighbourhood || null;
 }
 
 function placeAddress(place: PublicPlaceResult) {
+  if (place.is_manual_candidate) return null;
   return place.address?.road || place.display_name || null;
+}
+
+function placeSourceLabel(place: PublicPlaceResult) {
+  if (place.is_manual_candidate) return "pendente de validação";
+  return place.type ?? place.category ?? "local";
+}
+
+function publicSearchUrl(nome: string, cidade: string, uf: string) {
+  const query = [nome, cidade, uf].filter(Boolean).join(" ");
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 function placeToLocal(place: PublicPlaceResult, tipo: TipoLocal, cidadeFallback: string, ufFallback: string) {
   const title = placeTitle(place);
+  const isManualCandidate = Boolean(place.is_manual_candidate);
+
+  if (isManualCandidate) {
+    return {
+      nome: title,
+      tipo,
+      endereco: null,
+      bairro: null,
+      cidade: placeCity(place, cidadeFallback),
+      uf: ufFallback.trim().toUpperCase() || null,
+      unidades_estimadas: null,
+      observacoes: "Candidato criado a partir da busca por nome. A fonte cartográfica não confirmou automaticamente este condomínio/prédio. Validar endereço, anúncios públicos, CNPJ ou contato institucional antes de usar em prospecção.",
+      origem: "manual" as const,
+      confianca: "Baixo" as const,
+    };
+  }
+
   const coords = place.lat && place.lon ? `Coordenadas: ${place.lat}, ${place.lon}. ` : "";
   const source = place.osm_type || place.osm_id ? `OSM: ${place.osm_type ?? ""} ${place.osm_id ?? ""}. ` : "";
 
