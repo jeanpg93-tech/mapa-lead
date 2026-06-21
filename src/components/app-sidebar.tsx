@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const principais = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Busca Territorial", url: "/buscar", icon: Search },
   { title: "Locais", url: "/locais", icon: Building2 },
 ];
