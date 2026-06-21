@@ -190,6 +190,7 @@ function ContatosPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </>
         }
       />
       <PageBody>
