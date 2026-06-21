@@ -9,38 +9,214 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as OportunidadesRouteImport } from './routes/oportunidades'
+import { Route as LocaisRouteImport } from './routes/locais'
+import { Route as FunilRouteImport } from './routes/funil'
+import { Route as FontesRouteImport } from './routes/fontes'
+import { Route as ContatosRouteImport } from './routes/contatos'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LocaisIdRouteImport } from './routes/locais.$id'
 
+const TarefasRoute = TarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OportunidadesRoute = OportunidadesRouteImport.update({
+  id: '/oportunidades',
+  path: '/oportunidades',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocaisRoute = LocaisRouteImport.update({
+  id: '/locais',
+  path: '/locais',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FunilRoute = FunilRouteImport.update({
+  id: '/funil',
+  path: '/funil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FontesRoute = FontesRouteImport.update({
+  id: '/fontes',
+  path: '/fontes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatosRoute = ContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LocaisIdRoute = LocaisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => LocaisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/fontes': typeof FontesRoute
+  '/funil': typeof FunilRoute
+  '/locais': typeof LocaisRouteWithChildren
+  '/oportunidades': typeof OportunidadesRoute
+  '/tarefas': typeof TarefasRoute
+  '/locais/$id': typeof LocaisIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/fontes': typeof FontesRoute
+  '/funil': typeof FunilRoute
+  '/locais': typeof LocaisRouteWithChildren
+  '/oportunidades': typeof OportunidadesRoute
+  '/tarefas': typeof TarefasRoute
+  '/locais/$id': typeof LocaisIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/fontes': typeof FontesRoute
+  '/funil': typeof FunilRoute
+  '/locais': typeof LocaisRouteWithChildren
+  '/oportunidades': typeof OportunidadesRoute
+  '/tarefas': typeof TarefasRoute
+  '/locais/$id': typeof LocaisIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/buscar'
+    | '/configuracoes'
+    | '/contatos'
+    | '/fontes'
+    | '/funil'
+    | '/locais'
+    | '/oportunidades'
+    | '/tarefas'
+    | '/locais/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/buscar'
+    | '/configuracoes'
+    | '/contatos'
+    | '/fontes'
+    | '/funil'
+    | '/locais'
+    | '/oportunidades'
+    | '/tarefas'
+    | '/locais/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/buscar'
+    | '/configuracoes'
+    | '/contatos'
+    | '/fontes'
+    | '/funil'
+    | '/locais'
+    | '/oportunidades'
+    | '/tarefas'
+    | '/locais/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BuscarRoute: typeof BuscarRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ContatosRoute: typeof ContatosRoute
+  FontesRoute: typeof FontesRoute
+  FunilRoute: typeof FunilRoute
+  LocaisRoute: typeof LocaisRouteWithChildren
+  OportunidadesRoute: typeof OportunidadesRoute
+  TarefasRoute: typeof TarefasRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tarefas': {
+      id: '/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oportunidades': {
+      id: '/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/oportunidades'
+      preLoaderRoute: typeof OportunidadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locais': {
+      id: '/locais'
+      path: '/locais'
+      fullPath: '/locais'
+      preLoaderRoute: typeof LocaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funil': {
+      id: '/funil'
+      path: '/funil'
+      fullPath: '/funil'
+      preLoaderRoute: typeof FunilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fontes': {
+      id: '/fontes'
+      path: '/fontes'
+      fullPath: '/fontes'
+      preLoaderRoute: typeof FontesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contatos': {
+      id: '/contatos'
+      path: '/contatos'
+      fullPath: '/contatos'
+      preLoaderRoute: typeof ContatosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +224,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/locais/$id': {
+      id: '/locais/$id'
+      path: '/$id'
+      fullPath: '/locais/$id'
+      preLoaderRoute: typeof LocaisIdRouteImport
+      parentRoute: typeof LocaisRoute
+    }
   }
 }
 
+interface LocaisRouteChildren {
+  LocaisIdRoute: typeof LocaisIdRoute
+}
+
+const LocaisRouteChildren: LocaisRouteChildren = {
+  LocaisIdRoute: LocaisIdRoute,
+}
+
+const LocaisRouteWithChildren =
+  LocaisRoute._addFileChildren(LocaisRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BuscarRoute: BuscarRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ContatosRoute: ContatosRoute,
+  FontesRoute: FontesRoute,
+  FunilRoute: FunilRoute,
+  LocaisRoute: LocaisRouteWithChildren,
+  OportunidadesRoute: OportunidadesRoute,
+  TarefasRoute: TarefasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
