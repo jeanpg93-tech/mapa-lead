@@ -14,6 +14,7 @@ import { Route as OportunidadesRouteImport } from './routes/oportunidades'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as FunilRouteImport } from './routes/funil'
 import { Route as FontesRouteImport } from './routes/fontes'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as BuscarRouteImport } from './routes/buscar'
@@ -44,6 +45,11 @@ const FunilRoute = FunilRouteImport.update({
 const FontesRoute = FontesRouteImport.update({
   id: '/fontes',
   path: '/fontes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatosRoute = ContatosRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/buscar': typeof BuscarRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/dashboard': typeof DashboardRoute
   '/fontes': typeof FontesRoute
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/buscar': typeof BuscarRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/dashboard': typeof DashboardRoute
   '/fontes': typeof FontesRoute
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/buscar': typeof BuscarRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/dashboard': typeof DashboardRoute
   '/fontes': typeof FontesRoute
   '/funil': typeof FunilRoute
   '/locais': typeof LocaisRouteWithChildren
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/configuracoes'
     | '/contatos'
+    | '/dashboard'
     | '/fontes'
     | '/funil'
     | '/locais'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/configuracoes'
     | '/contatos'
+    | '/dashboard'
     | '/fontes'
     | '/funil'
     | '/locais'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/configuracoes'
     | '/contatos'
+    | '/dashboard'
     | '/fontes'
     | '/funil'
     | '/locais'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   BuscarRoute: typeof BuscarRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContatosRoute: typeof ContatosRoute
+  DashboardRoute: typeof DashboardRoute
   FontesRoute: typeof FontesRoute
   FunilRoute: typeof FunilRoute
   LocaisRoute: typeof LocaisRouteWithChildren
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/fontes'
       fullPath: '/fontes'
       preLoaderRoute: typeof FontesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contatos': {
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuscarRoute: BuscarRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContatosRoute: ContatosRoute,
+  DashboardRoute: DashboardRoute,
   FontesRoute: FontesRoute,
   FunilRoute: FunilRoute,
   LocaisRoute: LocaisRouteWithChildren,

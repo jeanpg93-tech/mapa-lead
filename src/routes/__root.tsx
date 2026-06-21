@@ -140,6 +140,7 @@ function RootComponent() {
 function AuthGate() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const isPublicRoute = pathname === "/" || pathname === "/auth";
   const isAuthRoute = pathname === "/auth";
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
@@ -162,12 +163,12 @@ function AuthGate() {
 
   useEffect(() => {
     if (!ready) return;
-    if (!session && !isAuthRoute) {
+    if (!session && !isPublicRoute) {
       navigate({ to: "/auth", replace: true });
     }
-  }, [ready, session, isAuthRoute, navigate]);
+  }, [ready, session, isPublicRoute, navigate]);
 
-  if (isAuthRoute) {
+  if (isPublicRoute) {
     return (
       <>
         <Outlet />

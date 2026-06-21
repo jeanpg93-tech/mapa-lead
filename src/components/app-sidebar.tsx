@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const principais = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Busca Territorial", url: "/buscar", icon: Search },
   { title: "Locais", url: "/locais", icon: Building2 },
 ];
@@ -43,8 +43,7 @@ const governanca = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = (url: string) =>
-    url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
+  const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
 
   const renderGroup = (label: string, items: typeof principais) => (
     <SidebarGroup>
@@ -69,7 +68,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link to="/" className="flex items-center gap-2 px-2 py-3">
+        <Link to="/dashboard" className="flex items-center gap-2 px-2 py-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent text-accent-foreground">
             <MapPinned className="h-5 w-5" />
           </div>
