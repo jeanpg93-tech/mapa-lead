@@ -14,6 +14,247 @@ export type Database = {
   }
   public: {
     Tables: {
+      contatos: {
+        Row: {
+          base_legal: string | null
+          consentimento: Database["public"]["Enums"]["consentimento_contato"]
+          created_at: string
+          email: string | null
+          id: string
+          local_id: string | null
+          nao_contatar: boolean
+          nome: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          owner_id: string
+          telefone: string | null
+          tipo: Database["public"]["Enums"]["tipo_contato"]
+          updated_at: string
+        }
+        Insert: {
+          base_legal?: string | null
+          consentimento?: Database["public"]["Enums"]["consentimento_contato"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          local_id?: string | null
+          nao_contatar?: boolean
+          nome: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          owner_id: string
+          telefone?: string | null
+          tipo: Database["public"]["Enums"]["tipo_contato"]
+          updated_at?: string
+        }
+        Update: {
+          base_legal?: string | null
+          consentimento?: Database["public"]["Enums"]["consentimento_contato"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          local_id?: string | null
+          nao_contatar?: boolean
+          nome?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          owner_id?: string
+          telefone?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_contato"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contatos_local_id_fkey"
+            columns: ["local_id"]
+            isOneToOne: false
+            referencedRelation: "locais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fontes: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          owner_id: string
+          registros: number
+          status: Database["public"]["Enums"]["status_fonte"]
+          tipo: Database["public"]["Enums"]["tipo_fonte"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          owner_id: string
+          registros?: number
+          status?: Database["public"]["Enums"]["status_fonte"]
+          tipo: Database["public"]["Enums"]["tipo_fonte"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          owner_id?: string
+          registros?: number
+          status?: Database["public"]["Enums"]["status_fonte"]
+          tipo?: Database["public"]["Enums"]["tipo_fonte"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      locais: {
+        Row: {
+          bairro: string | null
+          cidade: string | null
+          confianca: Database["public"]["Enums"]["grau_confianca"]
+          created_at: string
+          endereco: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          owner_id: string
+          tipo: Database["public"]["Enums"]["tipo_local"]
+          uf: string | null
+          unidades_estimadas: number | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          cidade?: string | null
+          confianca?: Database["public"]["Enums"]["grau_confianca"]
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          owner_id: string
+          tipo: Database["public"]["Enums"]["tipo_local"]
+          uf?: string | null
+          unidades_estimadas?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          cidade?: string | null
+          confianca?: Database["public"]["Enums"]["grau_confianca"]
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          owner_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_local"]
+          uf?: string | null
+          unidades_estimadas?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      oportunidades: {
+        Row: {
+          created_at: string
+          id: string
+          local_id: string | null
+          owner_id: string
+          responsavel: string | null
+          status: Database["public"]["Enums"]["status_oportunidade"]
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          local_id?: string | null
+          owner_id: string
+          responsavel?: string | null
+          status?: Database["public"]["Enums"]["status_oportunidade"]
+          titulo: string
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          local_id?: string | null
+          owner_id?: string
+          responsavel?: string | null
+          status?: Database["public"]["Enums"]["status_oportunidade"]
+          titulo?: string
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oportunidades_local_id_fkey"
+            columns: ["local_id"]
+            isOneToOne: false
+            referencedRelation: "locais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefas: {
+        Row: {
+          created_at: string
+          id: string
+          local_id: string | null
+          oportunidade_id: string | null
+          owner_id: string
+          prazo: string | null
+          responsavel: string | null
+          status: Database["public"]["Enums"]["status_tarefa"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          local_id?: string | null
+          oportunidade_id?: string | null
+          owner_id: string
+          prazo?: string | null
+          responsavel?: string | null
+          status?: Database["public"]["Enums"]["status_tarefa"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          local_id?: string | null
+          oportunidade_id?: string | null
+          owner_id?: string
+          prazo?: string | null
+          responsavel?: string | null
+          status?: Database["public"]["Enums"]["status_tarefa"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_local_id_fkey"
+            columns: ["local_id"]
+            isOneToOne: false
+            referencedRelation: "locais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "oportunidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -50,6 +291,38 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      consentimento_contato: "Sim" | "Não" | "Pendente"
+      grau_confianca: "Baixo" | "Médio" | "Alto"
+      origem_dado: "manual" | "demo" | "parceiro" | "importação" | "público"
+      status_fonte: "Ativa" | "Planejada" | "Pausada"
+      status_oportunidade:
+        | "Novo"
+        | "Em pesquisa"
+        | "Potencial identificado"
+        | "Contato permitido"
+        | "Em negociação"
+        | "Convertido"
+        | "Perdido"
+      status_tarefa: "Aberta" | "Em andamento" | "Concluída"
+      tipo_contato:
+        | "Administradora"
+        | "Síndico"
+        | "Empresa"
+        | "Lead manual"
+        | "Demo"
+      tipo_fonte:
+        | "Base manual"
+        | "Mock/Demo"
+        | "API"
+        | "Parceiro"
+        | "Importação"
+        | "Dados públicos"
+      tipo_local:
+        | "Condomínio"
+        | "Edifício"
+        | "Bairro"
+        | "Rua"
+        | "Região Comercial"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -178,6 +451,42 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      consentimento_contato: ["Sim", "Não", "Pendente"],
+      grau_confianca: ["Baixo", "Médio", "Alto"],
+      origem_dado: ["manual", "demo", "parceiro", "importação", "público"],
+      status_fonte: ["Ativa", "Planejada", "Pausada"],
+      status_oportunidade: [
+        "Novo",
+        "Em pesquisa",
+        "Potencial identificado",
+        "Contato permitido",
+        "Em negociação",
+        "Convertido",
+        "Perdido",
+      ],
+      status_tarefa: ["Aberta", "Em andamento", "Concluída"],
+      tipo_contato: [
+        "Administradora",
+        "Síndico",
+        "Empresa",
+        "Lead manual",
+        "Demo",
+      ],
+      tipo_fonte: [
+        "Base manual",
+        "Mock/Demo",
+        "API",
+        "Parceiro",
+        "Importação",
+        "Dados públicos",
+      ],
+      tipo_local: [
+        "Condomínio",
+        "Edifício",
+        "Bairro",
+        "Rua",
+        "Região Comercial",
+      ],
     },
   },
 } as const
