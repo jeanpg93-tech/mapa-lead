@@ -10,6 +10,7 @@ import {
   Database,
   Settings,
   MapPinned,
+  BarChart3,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ const principais = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Busca Territorial", url: "/buscar", icon: Search },
   { title: "Locais", url: "/locais", icon: Building2 },
+  { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
 ];
 
 const comercial = [
