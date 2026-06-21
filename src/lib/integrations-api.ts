@@ -34,9 +34,10 @@ function onlyDigits(value: string) {
 function stableStringify(value: Json): string {
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
   if (value && typeof value === "object") {
-    return `{${Object.keys(value)
+    const objectValue = value as JsonObject;
+    return `{${Object.keys(objectValue)
       .sort()
-      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key] ?? null)}`)
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(objectValue[key] ?? null)}`)
       .join(",")}}`;
   }
   return JSON.stringify(value);
@@ -108,16 +109,18 @@ async function withCache<T extends Json>(
     .eq("owner_id", ownerId)
     .eq("provider", provider)
     .eq("cache_key", key)
-    .maybeSingle<CacheRow>();
+    .maybeSingle();
 
-  if (cached && (!cached.expires_at || new Date(cached.expires_at) > new Date())) {
+  const cachedRow = cached as CacheRow | null;
+
+  if (cachedRow && (!cachedRow.expires_at || new Date(cachedRow.expires_at) > new Date())) {
     return {
       provider,
       action,
       params,
-      data: cached.response_data as T,
+      data: cachedRow.response_data as T,
       cached: true,
-      fetchedAt: cached.updated_at,
+      fetchedAt: cachedRow.updated_at,
     };
   }
 
