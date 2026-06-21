@@ -1,23 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search, MapPin } from "lucide-react";
 import { PageBody, PageHeader } from "@/components/page-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { locais, type TipoLocal } from "@/lib/mock-data";
+import { listLocais, TIPOS_LOCAL, type TipoLocal } from "@/lib/locais-api";
 
 export const Route = createFileRoute("/buscar")({
   head: () => ({ meta: [{ title: "Busca Territorial — MapaLead" }] }),
   component: BuscaTerritorial,
 });
 
-const tipos: (TipoLocal | "Todos")[] = ["Todos", "Condomínio", "Edifício", "Bairro", "Rua", "Região Comercial"];
+const filtros: (TipoLocal | "Todos")[] = ["Todos", ...TIPOS_LOCAL];
 
 function BuscaTerritorial() {
   const [q, setQ] = useState("");
-  const [tipo, setTipo] = useState<(typeof tipos)[number]>("Todos");
+  const [tipo, setTipo] = useState<(typeof filtros)[number]>("Todos");
+  const { data: locais = [], isLoading } = useQuery({
+    queryKey: ["locais"],
+    queryFn: listLocais,
+  });
 
   const resultados = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -25,10 +30,12 @@ function BuscaTerritorial() {
       const matchTipo = tipo === "Todos" || l.tipo === tipo;
       const matchTerm =
         !term ||
-        [l.nome, l.bairro, l.cidade, l.endereco].some((f) => f.toLowerCase().includes(term));
+        [l.nome, l.bairro ?? "", l.cidade ?? "", l.endereco ?? ""].some((f) =>
+          f.toLowerCase().includes(term),
+        );
       return matchTipo && matchTerm;
     });
-  }, [q, tipo]);
+  }, [q, tipo, locais]);
 
   return (
     <>
@@ -49,7 +56,7 @@ function BuscaTerritorial() {
               />
             </div>
             <div className="flex flex-wrap gap-1">
-              {tipos.map((t) => (
+              {filtros.map((t) => (
                 <Button
                   key={t}
                   size="sm"
@@ -64,8 +71,9 @@ function BuscaTerritorial() {
         </Card>
 
         <p className="mb-3 text-xs text-muted-foreground">
-          {resultados.length} resultado{resultados.length === 1 ? "" : "s"} encontrado
-          {resultados.length === 1 ? "" : "s"}
+          {isLoading
+            ? "Carregando…"
+            : `${resultados.length} resultado${resultados.length === 1 ? "" : "s"} encontrado${resultados.length === 1 ? "" : "s"}`}
         </p>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -77,24 +85,25 @@ function BuscaTerritorial() {
                     <div>
                       <h3 className="font-semibold text-foreground">{l.nome}</h3>
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3" /> {l.endereco !== "—" ? `${l.endereco} · ` : ""}
-                        {l.bairro}, {l.cidade}/{l.uf}
+                        <MapPin className="h-3 w-3" />
+                        {l.endereco ? `${l.endereco} · ` : ""}
+                        {[l.bairro, l.cidade].filter(Boolean).join(", ")}
+                        {l.uf ? `/${l.uf}` : ""}
                       </p>
                     </div>
                     <Badge variant="outline">{l.tipo}</Badge>
                   </div>
                   <div className="mt-auto flex flex-wrap items-center gap-2 text-xs">
                     <Badge variant="secondary">Confiança: {l.confianca}</Badge>
-                    {l.unidadesEstimadas && (
-                      <Badge variant="secondary">{l.unidadesEstimadas} unidades</Badge>
+                    {l.unidades_estimadas != null && (
+                      <Badge variant="secondary">{l.unidades_estimadas} unidades</Badge>
                     )}
-                    <Badge variant="secondary">{l.oportunidadesAbertas} oport.</Badge>
                   </div>
                 </CardContent>
               </Card>
             </Link>
           ))}
-          {resultados.length === 0 && (
+          {!isLoading && resultados.length === 0 && (
             <Card className="md:col-span-2 xl:col-span-3">
               <CardContent className="p-8 text-center text-sm text-muted-foreground">
                 Nenhum local corresponde aos filtros aplicados.
