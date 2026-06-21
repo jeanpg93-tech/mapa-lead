@@ -77,15 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MapaLead — Inteligência territorial para prospecção" },
+      { name: "description", content: "MapaLead transforma território em oportunidades comerciais para corretores, imobiliárias e empresas." },
+      { property: "og:title", content: "MapaLead" },
+      { property: "og:description", content: "Plataforma de inteligência territorial para prospecção imobiliária e comercial." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
+
     links: [
       {
         rel: "stylesheet",
