@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Download, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageBody, PageHeader } from "@/components/page-shell";
@@ -40,6 +40,7 @@ import {
   type StatusTarefa,
 } from "@/lib/tarefas-api";
 import { listLocaisSimples } from "@/lib/oportunidades-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({ meta: [{ title: "Tarefas — MapaLead" }] }),
@@ -89,11 +90,28 @@ function TarefasPage() {
         title="Tarefas"
         description="Ações de prospecção: ligações, visitas, atualizações e propostas."
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-1 h-4 w-4" /> Nova tarefa</Button>
-            </DialogTrigger>
-            <DialogContent>
+          <>
+            <Button
+              variant="outline"
+              disabled={tarefas.length === 0}
+              onClick={() =>
+                exportToCsv("tarefas", [
+                  { header: "Título", accessor: (t) => t.titulo },
+                  { header: "Local", accessor: (t) => t.locais?.nome ?? "" },
+                  { header: "Status", accessor: (t) => t.status },
+                  { header: "Responsável", accessor: (t) => t.responsavel ?? "" },
+                  { header: "Prazo", accessor: (t) => t.prazo ?? "" },
+                  { header: "Criada em", accessor: (t) => t.created_at },
+                ], tarefas)
+              }
+            >
+              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-1 h-4 w-4" /> Nova tarefa</Button>
+              </DialogTrigger>
+              <DialogContent>
               <DialogHeader><DialogTitle>Nova tarefa</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
