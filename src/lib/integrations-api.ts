@@ -43,11 +43,70 @@ export type PublicPlaceResult = {
     [key: string]: Json | undefined;
   };
   boundingbox?: string[];
+  search_query?: string;
+  is_manual_candidate?: boolean;
+  validation_status?: string;
   [key: string]: Json | undefined;
 };
 
 function onlyDigits(value: string) {
   return value.replace(/\D/g, "");
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function uniqueValues(values: string[]) {
+  return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
+}
+
+function placeIdentity(place: PublicPlaceResult) {
+  return [
+    place.osm_type,
+    place.osm_id,
+    place.place_id,
+    normalizeText(place.display_name ?? ""),
+  ].join("|");
+}
+
+function buildPlaceQueries(nome: string, cidade: string, uf: string) {
+  const cleanName = nome.trim();
+  const baseName = cleanName.replace(/^(condom[ií]nio|residencial|edif[ií]cio|edificio|cond\.)\s+/i, "").trim();
+  const names = uniqueValues([
+    cleanName,
+    baseName,
+    `Condomínio ${baseName}`,
+    `Residencial ${baseName}`,
+    `Edifício ${baseName}`,
+  ]);
+
+  return uniqueValues(
+    names.flatMap((name) => [
+      `${name}, ${cidade}, ${uf}, Brasil`,
+      `${name}, ${cidade}, Brasil`,
+    ]),
+  );
+}
+
+function manualPlaceCandidate(nome: string, cidade: string, uf: string): PublicPlaceResult {
+  return {
+    name: nome,
+    display_name: `${nome}, ${cidade}/${uf} - candidato pendente de validação`,
+    category: "manual_candidate",
+    type: "pendente",
+    address: {
+      city: cidade,
+      state: uf,
+      country: "Brasil",
+    },
+    is_manual_candidate: true,
+    validation_status: "pendente",
+  };
 }
 
 async function invokePublicData<T extends Json>(
@@ -130,9 +189,43 @@ export async function buscarLocaisPublicosPorNome(input: {
   if (cidade.length < 2) throw new Error("Informe a cidade.");
   if (nome.length < 3) throw new Error("Digite pelo menos 3 caracteres do nome do local.");
 
-  return invokePublicData<PublicPlaceResult[]>("nominatim.search", {
-    q: `${nome}, ${cidade}, ${uf}, Brasil`,
+  const queries = buildPlaceQueries(nome, cidade, uf);
+  const allResults: PublicPlaceResult[] = [];
+  let anyCached = false;
+
+  for (const query of queries) {
+    const result = await invokePublicData<PublicPlaceResult[]>("nominatim.search", { q: query });
+    anyCached = anyCached || result.cached;
+    for (const place of result.data ?? []) {
+      allResults.push({ ...place, search_query: query });
+    }
+  }
+
+  const seen = new Set<string>();
+  const uniqueResults = allResults.filter((place) => {
+    const id = placeIdentity(place);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
   });
+
+  const normalizedName = normalizeText(nome);
+  const hasCloseName = uniqueResults.some((place) =>
+    normalizeText(`${place.name ?? ""} ${place.display_name ?? ""}`).includes(normalizedName),
+  );
+
+  if (!hasCloseName) {
+    uniqueResults.unshift(manualPlaceCandidate(nome, cidade, uf));
+  }
+
+  return {
+    provider: "nominatim" as const,
+    action: "search-expanded",
+    params: { uf, cidade, nome, queries },
+    data: uniqueResults,
+    cached: anyCached,
+    fetchedAt: new Date().toISOString(),
+  };
 }
 
 export type OverpassBBox = {
