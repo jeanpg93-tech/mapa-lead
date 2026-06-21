@@ -65,6 +65,16 @@ function uniqueValues(values: string[]) {
   return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
 }
 
+function stripPlacePrefixes(value: string) {
+  return value
+    .replace(
+      /\b(condom[ií]nio|condominio|cond\.|residencial|res\.|edif[ií]cio|edificio|pr[eé]dio|predio|empreendimento|conjunto)\b/gi,
+      " ",
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function placeIdentity(place: PublicPlaceResult) {
   return [
     place.osm_type,
@@ -74,15 +84,25 @@ function placeIdentity(place: PublicPlaceResult) {
   ].join("|");
 }
 
+function buildSearchablePlaceNames(nome: string) {
+  const cleanName = nome.trim();
+  const baseName = stripPlacePrefixes(cleanName);
+  const noPunctuation = baseName.replace(/[.,;:()[\]{}_-]+/g, " ").replace(/\s+/g, " ").trim();
+
+  return uniqueValues([baseName, noPunctuation, cleanName]).filter((name) => name.length >= 3);
+}
+
 function buildPlaceQueries(nome: string, cidade: string, uf: string) {
   const cleanName = nome.trim();
-  const baseName = cleanName.replace(/^(condom[ií]nio|residencial|edif[ií]cio|edificio|cond\.)\s+/i, "").trim();
+  const searchableNames = buildSearchablePlaceNames(cleanName);
+  const baseName = searchableNames[0] ?? cleanName;
   const names = uniqueValues([
-    cleanName,
     baseName,
+    cleanName,
     `Condomínio ${baseName}`,
     `Residencial ${baseName}`,
     `Edifício ${baseName}`,
+    ...searchableNames,
   ]);
 
   return uniqueValues(
@@ -107,6 +127,24 @@ function manualPlaceCandidate(nome: string, cidade: string, uf: string): PublicP
     is_manual_candidate: true,
     validation_status: "pendente",
   };
+}
+
+function placeMatchScore(place: PublicPlaceResult, searchableNames: string[]) {
+  const placeText = normalizeText(`${place.name ?? ""} ${place.display_name ?? ""}`);
+  const queryText = normalizeText(place.search_query ?? "");
+
+  return searchableNames.reduce((score, name, index) => {
+    const normalizedName = normalizeText(name);
+    if (!normalizedName) return score;
+
+    const exactWeight = index === 0 ? 6 : 4;
+    const queryWeight = index === 0 ? 3 : 2;
+    return (
+      score +
+      (placeText.includes(normalizedName) ? exactWeight : 0) +
+      (queryText.includes(normalizedName) ? queryWeight : 0)
+    );
+  }, Number(place.importance ?? 0));
 }
 
 async function invokePublicData<T extends Json>(
@@ -209,20 +247,24 @@ export async function buscarLocaisPublicosPorNome(input: {
     return true;
   });
 
-  const normalizedName = normalizeText(nome);
-  const hasCloseName = uniqueResults.some((place) =>
-    normalizeText(`${place.name ?? ""} ${place.display_name ?? ""}`).includes(normalizedName),
+  const searchableNames = buildSearchablePlaceNames(nome);
+  const sortedResults = uniqueResults.sort(
+    (a, b) => placeMatchScore(b, searchableNames) - placeMatchScore(a, searchableNames),
   );
+  const hasCloseName = sortedResults.some((place) => {
+    const placeText = normalizeText(`${place.name ?? ""} ${place.display_name ?? ""}`);
+    return searchableNames.some((name) => placeText.includes(normalizeText(name)));
+  });
 
   if (!hasCloseName) {
-    uniqueResults.unshift(manualPlaceCandidate(nome, cidade, uf));
+    sortedResults.unshift(manualPlaceCandidate(nome, cidade, uf));
   }
 
   return {
     provider: "nominatim" as const,
     action: "search-expanded",
-    params: { uf, cidade, nome, queries },
-    data: uniqueResults,
+    params: { uf, cidade, nome, termos_considerados: searchableNames, queries },
+    data: sortedResults,
     cached: anyCached,
     fetchedAt: new Date().toISOString(),
   };
