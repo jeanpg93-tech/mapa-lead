@@ -19,6 +19,33 @@ export type IntegrationResult<T = Json> = {
   fetchedAt: string;
 };
 
+export type PublicPlaceResult = {
+  place_id?: number;
+  osm_type?: string;
+  osm_id?: number;
+  name?: string;
+  display_name?: string;
+  lat?: string;
+  lon?: string;
+  category?: string;
+  type?: string;
+  importance?: number;
+  address?: {
+    road?: string;
+    suburb?: string;
+    neighbourhood?: string;
+    city?: string;
+    town?: string;
+    municipality?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
+    [key: string]: Json | undefined;
+  };
+  boundingbox?: string[];
+  [key: string]: Json | undefined;
+};
+
 function onlyDigits(value: string) {
   return value.replace(/\D/g, "");
 }
@@ -88,6 +115,24 @@ export async function geocodificarNominatim(query: string) {
   const q = query.trim();
   if (q.length < 3) throw new Error("Digite um endereço, condomínio, bairro ou cidade.");
   return invokePublicData<Json[]>("nominatim.search", { q });
+}
+
+export async function buscarLocaisPublicosPorNome(input: {
+  uf: string;
+  cidade: string;
+  nome: string;
+}) {
+  const uf = input.uf.trim().toUpperCase();
+  const cidade = input.cidade.trim();
+  const nome = input.nome.trim();
+
+  if (uf.length !== 2) throw new Error("Informe a UF com 2 letras.");
+  if (cidade.length < 2) throw new Error("Informe a cidade.");
+  if (nome.length < 3) throw new Error("Digite pelo menos 3 caracteres do nome do local.");
+
+  return invokePublicData<PublicPlaceResult[]>("nominatim.search", {
+    q: `${nome}, ${cidade}, ${uf}, Brasil`,
+  });
 }
 
 export type OverpassBBox = {
