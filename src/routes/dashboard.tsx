@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building2, Target, CheckSquare, MapPinned, ArrowRight, Database } from "lucide-react";
+import { Building2, Target, CheckSquare, MapPinned, ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { PageBody, PageHeader } from "@/components/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { locais, oportunidades, tarefas } from "@/lib/mock-data";
-import { supabaseConfigured } from "@/lib/supabase-external";
+import { listLocais } from "@/lib/locais-api";
+import { listOportunidades } from "@/lib/oportunidades-api";
+import { listTarefas } from "@/lib/tarefas-api";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -35,10 +37,14 @@ function Stat({ icon: Icon, label, value, hint }: { icon: any; label: string; va
 }
 
 function Dashboard() {
-  const oportAbertas = oportunidades.filter((o) => o !== undefined && o.status !== "Convertido" && o.status !== "Perdido").length;
+  const { data: locais = [] } = useQuery({ queryKey: ["locais"], queryFn: listLocais });
+  const { data: oportunidades = [] } = useQuery({ queryKey: ["oportunidades"], queryFn: listOportunidades });
+  const { data: tarefas = [] } = useQuery({ queryKey: ["tarefas"], queryFn: listTarefas });
+
+  const oportAbertas = oportunidades.filter((o) => o.status !== "Convertido" && o.status !== "Perdido").length;
   const tarefasPendentes = tarefas.filter((t) => t.status !== "Concluída").length;
   const regioesMonitoradas = locais.filter((l) => l.tipo === "Bairro" || l.tipo === "Região Comercial").length;
-  const recentes = [...oportunidades].sort((a, b) => b.criadaEm.localeCompare(a.criadaEm)).slice(0, 5);
+  const recentes = [...oportunidades].slice(0, 5);
 
   return (
     <>
@@ -54,20 +60,6 @@ function Dashboard() {
         }
       />
       <PageBody>
-        {!supabaseConfigured && (
-          <div className="mb-6 flex items-start gap-3 rounded-md border border-accent/40 bg-accent/10 p-4 text-sm">
-            <Database className="mt-0.5 h-4 w-4 text-accent-foreground" />
-            <div>
-              <p className="font-medium text-foreground">Supabase externo não configurado</p>
-              <p className="text-muted-foreground">
-                Defina <code className="rounded bg-background px-1">VITE_SUPABASE_URL</code> e{" "}
-                <code className="rounded bg-background px-1">VITE_SUPABASE_ANON_KEY</code> em <code>.env</code>.
-                Enquanto isso o protótipo opera com dados fictícios de demonstração.
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat icon={Building2} label="Locais cadastrados" value={locais.length} hint="Condomínios, edifícios, bairros e regiões" />
           <Stat icon={Target} label="Oportunidades abertas" value={oportAbertas} />
@@ -81,22 +73,21 @@ function Dashboard() {
               <CardTitle className="text-base">Oportunidades recentes</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="divide-y divide-border">
-                {recentes.map((o) => {
-                  const local = locais.find((l) => l.id === o.localId);
-                  return (
+              {recentes.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma oportunidade ainda.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {recentes.map((o) => (
                     <li key={o.id} className="flex items-center justify-between gap-3 py-3">
                       <div>
                         <p className="text-sm font-medium text-foreground">{o.titulo}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {local?.nome} · {local?.bairro}, {local?.cidade}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{o.locais?.nome ?? "—"}</p>
                       </div>
                       <Badge variant="secondary">{o.status}</Badge>
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
 
@@ -108,7 +99,7 @@ function Dashboard() {
               <Button variant="outline" asChild><Link to="/locais">Ver todos os locais</Link></Button>
               <Button variant="outline" asChild><Link to="/funil">Abrir funil de oportunidades</Link></Button>
               <Button variant="outline" asChild><Link to="/tarefas">Minhas tarefas</Link></Button>
-              <Button variant="outline" asChild><Link to="/fontes">Fontes de dados</Link></Button>
+              <Button variant="outline" asChild><Link to="/contatos">Contatos</Link></Button>
             </CardContent>
           </Card>
         </div>
