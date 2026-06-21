@@ -82,7 +82,6 @@ function OportunidadesPage() {
                   { header: "Status", accessor: (o) => o.status },
                   { header: "Responsável", accessor: (o) => o.responsavel ?? "" },
                   { header: "Valor estimado", accessor: (o) => o.valor_estimado ?? "" },
-                  { header: "Probabilidade", accessor: (o) => o.probabilidade ?? "" },
                   { header: "Criada em", accessor: (o) => o.created_at },
                 ], ops)
               }
