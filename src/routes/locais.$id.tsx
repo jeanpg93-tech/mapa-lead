@@ -1,26 +1,16 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Building2, MapPin, ShieldCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { PageBody, PageHeader } from "@/components/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  contatosDoLocal,
-  getLocal,
-  oportunidadesDoLocal,
-  tarefasDoLocal,
-} from "@/lib/mock-data";
+import { supabase } from "@/integrations/supabase/client";
+import { getLocalById } from "@/lib/locais-api";
 
 export const Route = createFileRoute("/locais/$id")({
-  head: ({ params }) => ({
-    meta: [{ title: `${getLocal(params.id)?.nome ?? "Local"} — MapaLead` }],
-  }),
-  loader: ({ params }) => {
-    const local = getLocal(params.id);
-    if (!local) throw notFound();
-    return local;
-  },
+  head: () => ({ meta: [{ title: "Local — MapaLead" }] }),
   notFoundComponent: () => (
     <div className="p-8 text-sm text-muted-foreground">Local não encontrado.</div>
   ),
@@ -32,16 +22,65 @@ export const Route = createFileRoute("/locais/$id")({
 
 function DetalheLocal() {
   const { id } = Route.useParams();
-  const local = getLocal(id)!;
-  const ops = oportunidadesDoLocal(id);
-  const tks = tarefasDoLocal(id);
-  const cts = contatosDoLocal(id);
+
+  const { data: local, isLoading } = useQuery({
+    queryKey: ["locais", id],
+    queryFn: () => getLocalById(id),
+  });
+
+  const { data: ops = [] } = useQuery({
+    queryKey: ["oportunidades", { localId: id }],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("oportunidades")
+        .select("*")
+        .eq("local_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: tks = [] } = useQuery({
+    queryKey: ["tarefas", { localId: id }],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tarefas")
+        .select("*")
+        .eq("local_id", id)
+        .order("prazo", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: cts = [] } = useQuery({
+    queryKey: ["contatos", { localId: id }],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contatos")
+        .select("*")
+        .eq("local_id", id)
+        .order("nome");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  if (isLoading) {
+    return <div className="p-8 text-sm text-muted-foreground">Carregando…</div>;
+  }
+  if (!local) {
+    return <div className="p-8 text-sm text-muted-foreground">Local não encontrado.</div>;
+  }
+
+  const atualizadoEm = new Date(local.updated_at).toLocaleDateString("pt-BR");
 
   return (
     <>
       <PageHeader
         title={local.nome}
-        description={`${local.endereco !== "—" ? local.endereco + " · " : ""}${local.bairro}, ${local.cidade}/${local.uf}`}
+        description={`${local.endereco ? local.endereco + " · " : ""}${local.bairro ?? ""}${local.cidade ? `, ${local.cidade}` : ""}${local.uf ? `/${local.uf}` : ""}`}
         actions={
           <Button variant="outline" asChild>
             <Link to="/locais">
@@ -60,9 +99,9 @@ function DetalheLocal() {
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <Info label="Tipo" value={local.tipo} />
-              <Info label="Bairro" value={local.bairro} />
-              <Info label="Cidade" value={`${local.cidade}/${local.uf}`} />
-              <Info label="Unidades estimadas" value={local.unidadesEstimadas?.toString() ?? "—"} />
+              <Info label="Bairro" value={local.bairro ?? "—"} />
+              <Info label="Cidade" value={`${local.cidade ?? "—"}${local.uf ? `/${local.uf}` : ""}`} />
+              <Info label="Unidades estimadas" value={local.unidades_estimadas?.toString() ?? "—"} />
               <Info label="Origem do dado" value={local.origem} />
               <Info label="Grau de confiança" value={local.confianca} />
               <div className="sm:col-span-2">
@@ -85,7 +124,7 @@ function DetalheLocal() {
               </p>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span>Atualizado em {local.atualizadoEm}</span>
+                <span>Atualizado em {atualizadoEm}</span>
               </div>
               <Badge variant="secondary">LGPD · privacy-first</Badge>
             </CardContent>
@@ -104,12 +143,16 @@ function DetalheLocal() {
             <Card>
               <CardContent className="p-0">
                 <ul className="divide-y divide-border">
-                  {ops.length === 0 && <li className="p-4 text-sm text-muted-foreground">Nenhuma oportunidade vinculada.</li>}
+                  {ops.length === 0 && (
+                    <li className="p-4 text-sm text-muted-foreground">Nenhuma oportunidade vinculada.</li>
+                  )}
                   {ops.map((o) => (
                     <li key={o.id} className="flex items-center justify-between p-4">
                       <div>
                         <p className="text-sm font-medium">{o.titulo}</p>
-                        <p className="text-xs text-muted-foreground">{o.responsavel} · criada em {o.criadaEm}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {o.responsavel ?? "—"} · criada em {new Date(o.created_at).toLocaleDateString("pt-BR")}
+                        </p>
                       </div>
                       <Badge>{o.status}</Badge>
                     </li>
@@ -123,12 +166,16 @@ function DetalheLocal() {
             <Card>
               <CardContent className="p-0">
                 <ul className="divide-y divide-border">
-                  {tks.length === 0 && <li className="p-4 text-sm text-muted-foreground">Sem tarefas.</li>}
+                  {tks.length === 0 && (
+                    <li className="p-4 text-sm text-muted-foreground">Sem tarefas.</li>
+                  )}
                   {tks.map((t) => (
                     <li key={t.id} className="flex items-center justify-between p-4">
                       <div>
                         <p className="text-sm font-medium">{t.titulo}</p>
-                        <p className="text-xs text-muted-foreground">{t.responsavel} · prazo {t.prazo}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t.responsavel ?? "—"} · prazo {t.prazo ?? "—"}
+                        </p>
                       </div>
                       <Badge variant="outline">{t.status}</Badge>
                     </li>
@@ -149,10 +196,10 @@ function DetalheLocal() {
                       <li key={c.id} className="flex items-center justify-between py-3">
                         <div>
                           <p className="font-medium text-foreground">{c.nome}</p>
-                          <p className="text-xs">{c.tipo} · base legal: {c.baseLegal}</p>
+                          <p className="text-xs">{c.tipo} · base legal: {c.base_legal ?? "—"}</p>
                         </div>
-                        <Badge variant={c.naoContatar ? "destructive" : "secondary"}>
-                          {c.naoContatar ? "Não contatar" : `Consentimento: ${c.consentimento}`}
+                        <Badge variant={c.nao_contatar ? "destructive" : "secondary"}>
+                          {c.nao_contatar ? "Não contatar" : `Consentimento: ${c.consentimento}`}
                         </Badge>
                       </li>
                     ))}
