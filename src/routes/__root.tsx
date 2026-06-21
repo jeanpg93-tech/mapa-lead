@@ -4,14 +4,18 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthHeaderButton } from "@/components/auth-header-button";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -128,28 +132,80 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <div className="flex min-h-screen flex-1 flex-col">
-            <header className="flex h-12 items-center gap-2 border-b border-border bg-card px-3">
-              <SidebarTrigger />
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                MapaLead · Protótipo
-              </span>
-              <div className="ml-auto">
-                <AuthHeaderButton />
-              </div>
-            </header>
-            <main className="flex flex-1 flex-col">
-              <Outlet />
-            </main>
-            <Toaster />
-
-          </div>
-        </div>
-      </SidebarProvider>
+      <AuthGate />
     </QueryClientProvider>
   );
 }
+
+function AuthGate() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const isAuthRoute = pathname === "/auth";
+  const [session, setSession] = useState<Session | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      setSession(data.session);
+      setReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setSession(s);
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    if (!session && !isAuthRoute) {
+      navigate({ to: "/auth", replace: true });
+    }
+  }, [ready, session, isAuthRoute, navigate]);
+
+  if (isAuthRoute) {
+    return (
+      <>
+        <Outlet />
+        <Toaster />
+      </>
+    );
+  }
+
+  if (!ready || !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-sm text-muted-foreground">Carregando…</div>
+      </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
+        <div className="flex min-h-screen flex-1 flex-col">
+          <header className="flex h-12 items-center gap-2 border-b border-border bg-card px-3">
+            <SidebarTrigger />
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              MapaLead · Protótipo
+            </span>
+            <div className="ml-auto">
+              <AuthHeaderButton />
+            </div>
+          </header>
+          <main className="flex flex-1 flex-col">
+            <Outlet />
+          </main>
+          <Toaster />
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 
