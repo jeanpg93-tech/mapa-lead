@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ShieldCheck, Plus, Trash2 } from "lucide-react";
+import { Download, ShieldCheck, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageBody, PageHeader } from "@/components/page-shell";
@@ -44,6 +44,7 @@ import {
   type OrigemDado,
   type TipoContato,
 } from "@/lib/contatos-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/contatos")({
   head: () => ({ meta: [{ title: "Contatos — MapaLead" }] }),
@@ -103,11 +104,31 @@ function ContatosPage() {
         title="Contatos"
         description="Apenas contatos legítimos: administradoras, síndicos, empresas e leads cadastrados com base legal."
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-1 h-4 w-4" /> Novo contato</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
+          <>
+            <Button
+              variant="outline"
+              disabled={contatos.length === 0}
+              onClick={() =>
+                exportToCsv("contatos", [
+                  { header: "Nome", accessor: (c) => c.nome },
+                  { header: "Tipo", accessor: (c) => c.tipo },
+                  { header: "Email", accessor: (c) => c.email ?? "" },
+                  { header: "Telefone", accessor: (c) => c.telefone ?? "" },
+                  { header: "Origem", accessor: (c) => c.origem },
+                  { header: "Consentimento", accessor: (c) => c.consentimento },
+                  { header: "Base legal", accessor: (c) => c.base_legal ?? "" },
+                  { header: "Não contatar", accessor: (c) => (c.nao_contatar ? "Sim" : "Não") },
+                  { header: "Criado em", accessor: (c) => c.created_at },
+                ], contatos)
+              }
+            >
+              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-1 h-4 w-4" /> Novo contato</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
               <DialogHeader><DialogTitle>Novo contato</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">

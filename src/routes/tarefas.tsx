@@ -156,6 +156,7 @@ function TarefasPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </>
         }
       />
       <PageBody>
