@@ -10,6 +10,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AuthHeaderButton } from "@/components/auth-header-button";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -131,10 +133,15 @@ function RootComponent() {
               <span className="text-xs uppercase tracking-wider text-muted-foreground">
                 MapaLead · Protótipo
               </span>
+              <div className="ml-auto">
+                <AuthHeaderButton />
+              </div>
             </header>
             <main className="flex flex-1 flex-col">
               <Outlet />
             </main>
+            <Toaster />
+
           </div>
         </div>
       </SidebarProvider>
