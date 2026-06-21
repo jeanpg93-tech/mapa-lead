@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          owner_id: string | null
+          provider: string
+          request_params: Json
+          response_data: Json
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id?: string | null
+          provider: string
+          request_params?: Json
+          response_data: Json
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id?: string | null
+          provider?: string
+          request_params?: Json
+          response_data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contatos: {
         Row: {
           base_legal: string | null
@@ -103,6 +139,39 @@ export type Database = {
           status?: Database["public"]["Enums"]["status_fonte"]
           tipo?: Database["public"]["Enums"]["tipo_fonte"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      integration_logs: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          id: string
+          owner_id: string | null
+          provider: string
+          request_params: Json
+          status: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          owner_id?: string | null
+          provider: string
+          request_params?: Json
+          status: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          owner_id?: string | null
+          provider?: string
+          request_params?: Json
+          status?: string
         }
         Relationships: []
       }
