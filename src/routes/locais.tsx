@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Download, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ import {
   type OrigemDado,
   type TipoLocal,
 } from "@/lib/locais-api";
+import { exportToCsv } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/locais")({
   head: () => ({ meta: [{ title: "Locais — MapaLead" }] }),
@@ -73,14 +74,37 @@ function LocaisPage() {
         title="Locais"
         description="Condomínios, edifícios, bairros e regiões cadastrados."
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-1 h-4 w-4" /> Novo local
-              </Button>
-            </DialogTrigger>
-            <NovoLocalDialog onDone={() => setOpen(false)} />
-          </Dialog>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={locais.length === 0}
+              onClick={() =>
+                exportToCsv("locais", [
+                  { header: "Nome", accessor: (l) => l.nome },
+                  { header: "Tipo", accessor: (l) => l.tipo },
+                  { header: "Endereço", accessor: (l) => l.endereco ?? "" },
+                  { header: "Bairro", accessor: (l) => l.bairro ?? "" },
+                  { header: "Cidade", accessor: (l) => l.cidade ?? "" },
+                  { header: "UF", accessor: (l) => l.uf ?? "" },
+                  { header: "Unidades estimadas", accessor: (l) => l.unidades_estimadas ?? "" },
+                  { header: "Confiança", accessor: (l) => l.confianca },
+                  { header: "Origem", accessor: (l) => l.origem },
+                  { header: "Observações", accessor: (l) => l.observacoes ?? "" },
+                  { header: "Atualizado em", accessor: (l) => l.updated_at },
+                ], locais)
+              }
+            >
+              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-1 h-4 w-4" /> Novo local
+                </Button>
+              </DialogTrigger>
+              <NovoLocalDialog onDone={() => setOpen(false)} />
+            </Dialog>
+          </div>
         }
       />
       <PageBody>
